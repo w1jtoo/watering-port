@@ -1,0 +1,9 @@
+[package]
+name = "watering-port"
+version = "0.1.0"
+authors = ["Kharlov Vasiliy <kharlov.v@skbkontur.ru>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
