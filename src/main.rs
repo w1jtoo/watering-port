@@ -8,7 +8,7 @@ mod port_info;
 
 fn main() -> io::Result<()> {
     let ports = block_on(get_ports(Duration::from_secs(2)));
-    println!("ports: {:?}", ports);
+    ports.iter().for_each(|p| println!("{}", p.to_string()));
     Ok(())
 }
 
@@ -20,7 +20,6 @@ async fn get_ports(duration: Duration) -> Vec<port_info::PortInfo> {
     }
 
     let port_results = join_all(tasks).await;
-    
     port_results
         .into_iter()
         .filter(|x| x.is_ok())
@@ -28,7 +27,7 @@ async fn get_ports(duration: Duration) -> Vec<port_info::PortInfo> {
         .collect()
 }
 
-async fn get_info(port: u16) -> Option<port_info::PortInfo> { 
+async fn get_info(port: u16) -> Option<port_info::PortInfo> {
     None
 }
 
