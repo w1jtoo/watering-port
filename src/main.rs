@@ -5,6 +5,8 @@ use futures::future::join_all;
 use std::io;
 use std::time::Duration;
 
+mod port_info;
+
 fn main() -> io::Result<()> {
     let ports = block_on(get_ports(Duration::from_secs(2)));
     println!("ports: {:?}", ports);
@@ -19,12 +21,16 @@ async fn get_ports(duration: Duration) -> Vec<u16> {
     }
 
     let port_results = join_all(tasks).await;
-
+    
     port_results
         .into_iter()
         .filter(|x| x.is_some())
         .map(|p| p.unwrap())
         .collect()
+}
+
+async fn get_info(port: u16) -> Option<port_info::PortInfo<'static>> { 
+    None
 }
 
 async fn check_port(port: u16, duration: Duration) -> Option<u16> {
