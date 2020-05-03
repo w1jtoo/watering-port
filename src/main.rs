@@ -7,7 +7,7 @@ use std::time::Duration;
 
 fn main() -> io::Result<()> {
     let ports = block_on(get_ports(Duration::from_secs(2)));
-    println!("{:?}", ports);
+    println!("ports: {:?}", ports);
     Ok(())
 }
 
