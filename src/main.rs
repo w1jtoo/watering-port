@@ -1,7 +1,6 @@
-use async_std::future::timeout;
-use async_std::net::TcpStream;
 use futures::executor::block_on;
 use futures::future::join_all;
+
 use std::io;
 use std::time::Duration;
 
@@ -13,39 +12,39 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-async fn get_ports(duration: Duration) -> Vec<u16> {
+async fn get_ports(duration: Duration) -> Vec<port_info::PortInfo> {
     let mut tasks = Vec::new();
 
     for port in 0..500 {
-        tasks.push(check_port(port, duration));
+        tasks.push(port_info::PortInfo::build_from(port, duration));
     }
 
     let port_results = join_all(tasks).await;
     
     port_results
         .into_iter()
-        .filter(|x| x.is_some())
+        .filter(|x| x.is_ok())
         .map(|p| p.unwrap())
         .collect()
 }
 
-async fn get_info(port: u16) -> Option<port_info::PortInfo<'static>> { 
+async fn get_info(port: u16) -> Option<port_info::PortInfo> { 
     None
 }
 
-async fn check_port(port: u16, duration: Duration) -> Option<u16> {
-    println!("{}", port);
+// async fn check_port(port: u16, duration: Duration) -> Option<u16> {
+//     println!("{}", port);
 
-    match timeout(
-        duration,
-        TcpStream::connect(format!("13.90.224.253:{}", port)),
-    )
-    .await
-    {
-        Ok(f) => match f {
-            Ok(_) => Some(port),
-            Err(_) => None,
-        },
-        Err(_) => None,
-    }
-}
+//     match timeout(
+//         duration,
+//         TcpStream::connect(format!("13.90.224.253:{}", port)),
+//     )
+//     .await
+//     {
+//         Ok(f) => match f {
+//             Ok(_) => Some(port),
+//             Err(_) => None,
+//         },
+//         Err(_) => None,
+//     }
+// }
