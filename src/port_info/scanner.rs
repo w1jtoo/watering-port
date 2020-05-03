@@ -11,10 +11,10 @@ use std::io::{Error, ErrorKind, Result};
 
 use std::str;
 
-pub async fn is_port_opened(port: u16, duration: Duration) -> bool {
+pub async fn is_port_opened(address: &str, port: u16, duration: Duration) -> bool {
     match timeout(
         duration,
-        TcpStream::connect(format!("13.90.224.253:{}", port)),
+        TcpStream::connect(format!("{}:{}", address, port)),
     )
     .await
     {
@@ -25,20 +25,23 @@ pub async fn is_port_opened(port: u16, duration: Duration) -> bool {
         Err(_) => false,
     }
 }
-pub async fn get_http_banner(port: u16) -> Result<String> {
+pub async fn get_http_banner(address: &str, port: u16) -> Result<String> {
     let client = Client::new();
-    let uri = format!("13.90.224.253:{}", port).parse::<Uri>().unwrap();
+    let uri = format!("{}:{}", address, port)
+        .parse::<Uri>()
+        .unwrap();
+
     match client.get(uri).await {
         Ok(resp) => Ok(resp.status().to_string()),
         Err(_) => Err(Error::new(ErrorKind::Other, "Can't get http answer!")),
     }
 }
 
-pub async fn get_socket_info(port: u16, duration: Duration) -> Result<String> {
+pub async fn get_socket_info(address: &str, port: u16, duration: Duration) -> Result<String> {
     let mut buffer: Vec<u8> = vec![0; 128];
     match timeout(
         duration,
-        TcpStream::connect(format!("13.90.224.253:{}", port)),
+        TcpStream::connect(format!("{}:{}", address, port)),
     )
     .await
     {

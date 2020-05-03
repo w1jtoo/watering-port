@@ -6,17 +6,30 @@ use std::time::Duration;
 
 mod port_info;
 
+use clap::App;
+
 fn main() -> io::Result<()> {
-    let ports = block_on(get_ports(Duration::from_secs(2)));
-    ports.iter().for_each(|p| println!("{}", p.to_string()));
+    let matches = App::new("watering-port")
+        .version("1.0")
+        .author("w1jtoo wanadooht@gmail.com")
+        .about("Smth about")
+        .arg("<ADDRESS>              'IP-adress of sec'")
+        .get_matches();
+    print_ports_info(matches.value_of("ADDRESS").expect("Can't get address"));
+
     Ok(())
 }
 
-async fn get_ports(duration: Duration) -> Vec<port_info::PortInfo> {
+fn print_ports_info(address: &str) {
+    let ports = block_on(get_ports(address, Duration::from_secs(2)));
+    ports.iter().for_each(|p| println!("{}", p.to_string()));
+}
+
+async fn get_ports(address: &str, duration: Duration) -> Vec<port_info::PortInfo> {
     let mut tasks = Vec::new();
 
     for port in 0..500 {
-        tasks.push(port_info::PortInfo::build_from(port, duration));
+        tasks.push(port_info::PortInfo::build_from(address, port, duration));
     }
 
     let port_results = join_all(tasks).await;
@@ -26,24 +39,3 @@ async fn get_ports(duration: Duration) -> Vec<port_info::PortInfo> {
         .map(|p| p.unwrap())
         .collect()
 }
-
-async fn get_info(port: u16) -> Option<port_info::PortInfo> {
-    None
-}
-
-// async fn check_port(port: u16, duration: Duration) -> Option<u16> {
-//     println!("{}", port);
-
-//     match timeout(
-//         duration,
-//         TcpStream::connect(format!("13.90.224.253:{}", port)),
-//     )
-//     .await
-//     {
-//         Ok(f) => match f {
-//             Ok(_) => Some(port),
-//             Err(_) => None,
-//         },
-//         Err(_) => None,
-//     }
-// }

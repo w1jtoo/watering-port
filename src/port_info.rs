@@ -20,11 +20,11 @@ impl PortInfo {
         }
     }
 
-    pub async fn build_from(port: u16, duration: Duration) -> io::Result<PortInfo> {
-        if scanner::is_port_opened(port, duration).await {
-            match scanner::get_http_banner(port).await {
+    pub async fn build_from(adress: &str, port: u16, duration: Duration) -> io::Result<PortInfo> {
+        if scanner::is_port_opened(adress, port, duration).await {
+            match scanner::get_http_banner(adress, port).await {
                 Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Http)),
-                Err(_) => match scanner::get_socket_info(port, Duration::from_secs(2)).await {
+                Err(_) => match scanner::get_socket_info(adress, port, Duration::from_secs(2)).await {
                     Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Tcp)),
                     Err(_) => Err(Error::new(
                         ErrorKind::NotConnected,
@@ -38,7 +38,6 @@ impl PortInfo {
     }
 
     pub fn to_string(&self) -> String {
-        // "".to_string()
         format!(
             "|{}| |{}| {}",
             self.port.to_string(),
@@ -52,8 +51,8 @@ impl PortInfo {
 pub enum ProtocolType {
     Http,
     Tcp,
-    Udp,
-    Https,
+    // Udp,
+    // Https,
 }
 
 impl ProtocolType {
@@ -61,8 +60,8 @@ impl ProtocolType {
         match self {
             ProtocolType::Http => "Http",
             ProtocolType::Tcp => "Tcp",
-            ProtocolType::Udp => "Udp",
-            ProtocolType::Https => "Https",
+            // ProtocolType::Udp => "Udp",
+            // ProtocolType::Https => "Https",
         }
     }
 }
