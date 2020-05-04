@@ -19,7 +19,7 @@ static ABOUT: &str = "       Tcp, udp high performed port scanner written in rus
 #[tokio::main]
 async fn main() -> io::Result<()> {
     let matches = App::new("~~~~~~~~~~~~~~~~~~~~ | watering-port |")
-        .version("|1.0| ~~~~~~~~~~~~~~~~~~~~~~")
+        .version("|0.1| ~~~~~~~~~~~~~~~~~~~~~~")
         .about(ABOUT)
         .arg(
             Arg::with_name("ADDRESS")
