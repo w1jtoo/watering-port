@@ -42,7 +42,7 @@ impl PortInfo {
 
     pub fn to_string(&self) -> String {
         format!(
-            "|{}| |{}| {}",
+            "|{:^6}| |{:^12}| {:^32}",
             self.port.to_string(),
             self.protocol_type.to_string(),
             self.message.trim()

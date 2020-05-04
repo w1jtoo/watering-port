@@ -57,10 +57,7 @@ pub async fn get_tcp_socket_info(address: &str, port: u16, duration: Duration) -
                         "Can't get connection stream",
                     )),
                 },
-                Err(_) => Err(Error::new(
-                    ErrorKind::ConnectionRefused,
-                    "Can't get connection stream",
-                )),
+                Err(_) => Ok("port is blocked by a firewall".to_string()),
             },
             Err(_) => Err(Error::new(
                 ErrorKind::ConnectionRefused,
