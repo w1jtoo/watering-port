@@ -20,11 +20,11 @@ impl PortInfo {
         }
     }
 
-    pub async fn build_from(adress: &str, port: u16, duration: Duration) -> io::Result<PortInfo> {
-        if scanner::is_port_opened(adress, port, duration).await {
-            match scanner::get_http_banner(adress, port).await {
+    pub async fn build_from(address: &str, port: u16, duration: Duration) -> io::Result<PortInfo> {
+        if scanner::is_port_opened(address, port, duration).await {
+            match scanner::get_http_banner(address, port, duration).await {
                 Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Http)),
-                Err(_) => match scanner::get_socket_info(adress, port, Duration::from_secs(2)).await {
+                Err(_) => match scanner::get_socket_info(address, port, Duration::from_secs(2)).await {
                     Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Tcp)),
                     Err(_) => Err(Error::new(
                         ErrorKind::NotConnected,

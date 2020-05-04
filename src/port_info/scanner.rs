@@ -25,15 +25,18 @@ pub async fn is_port_opened(address: &str, port: u16, duration: Duration) -> boo
         Err(_) => false,
     }
 }
-pub async fn get_http_banner(address: &str, port: u16) -> Result<String> {
+pub async fn get_http_banner(address: &str, port: u16, duration: Duration) -> Result<String> {
     let client = Client::new();
-    let uri = format!("{}:{}", address, port)
+    let uri = format!("http://{}:{}", address, port)
         .parse::<Uri>()
         .unwrap();
-
-    match client.get(uri).await {
-        Ok(resp) => Ok(resp.status().to_string()),
-        Err(_) => Err(Error::new(ErrorKind::Other, "Can't get http answer!")),
+    println!("hey hey");
+    match timeout(duration, client.get(uri)).await {
+        Ok(resp) => match resp {
+            Ok(resp) => Ok(resp.status().to_string()),
+            Err(_) => Err(Error::new(ErrorKind::Other, "Can't get http answer!")),
+        },
+        Err(_) => Err(Error::new(ErrorKind::TimedOut, "Connection Timeout"))
     }
 }
 

@@ -8,7 +8,9 @@ mod port_info;
 
 use clap::App;
 
-fn main() -> io::Result<()> {
+
+#[tokio::main]
+async fn main() -> io::Result<()> {
     let matches = App::new("watering-port")
         .version("1.0")
         .author("w1jtoo wanadooht@gmail.com")
