@@ -24,12 +24,15 @@ impl PortInfo {
         if scanner::is_port_opened(address, port, duration).await {
             match scanner::get_http_banner(address, port, duration).await {
                 Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Http)),
-                Err(_) => match scanner::get_socket_info(address, port, Duration::from_secs(2)).await {
+                Err(_) => match scanner::get_tcp_socket_info(address, port, duration).await {
                     Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Tcp)),
-                    Err(_) => Err(Error::new(
-                        ErrorKind::NotConnected,
-                        "Can't get data from socket",
-                    )),
+                    Err(_) => match scanner::get_udp_socket_info(address, port, duration).await {
+                        Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Udp)),
+                        Err(_) => Err(Error::new(
+                            ErrorKind::NotConnected,
+                            "Can't get data from socket",
+                        )),
+                    },
                 },
             }
         } else {
@@ -51,7 +54,7 @@ impl PortInfo {
 pub enum ProtocolType {
     Http,
     Tcp,
-    // Udp,
+    Udp,
     // Https,
 }
 
@@ -60,7 +63,7 @@ impl ProtocolType {
         match self {
             ProtocolType::Http => "Http",
             ProtocolType::Tcp => "Tcp",
-            // ProtocolType::Udp => "Udp",
+            ProtocolType::Udp => "Udp",
             // ProtocolType::Https => "Https",
         }
     }
