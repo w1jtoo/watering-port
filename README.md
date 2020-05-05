@@ -7,7 +7,7 @@ Watering-port is a tcp, udp scanner written in rust. Made due to Internet Protoc
 
 ## Install
 
-Download binaties from github source page.
+Download binaties from [github release page](https://github.com/w1jtoo/watering-port/releases).
 
 ## Build
 
