@@ -3,6 +3,7 @@ use std::time::Duration;
 use async_std::future::timeout;
 use async_std::net::{TcpStream, UdpSocket};
 use async_std::prelude::*;
+use std::future::Future;
 
 use hyper::http::Uri;
 use hyper::Client;
@@ -40,6 +41,19 @@ pub async fn get_http_banner(address: &str, port: u16, duration: Duration) -> Re
     }
 }
 
+pub async fn with_timeout<F>(duration: Duration, f: F) -> Result<String>
+where
+    F: Future<Output = Result<String>>,
+{
+    match timeout(duration, f).await {
+        Ok(answ) => match answ {
+            Ok(res) => Ok(res),
+            Err(e) => Err(e),
+        },
+        Err(_) => Ok("port is blocked by a firewall".to_string()),
+    }
+}
+
 pub async fn get_tcp_socket_info(address: &str, port: u16, duration: Duration) -> Result<String> {
     let mut buffer: Vec<u8> = vec![0; 128];
     match timeout(
@@ -51,7 +65,9 @@ pub async fn get_tcp_socket_info(address: &str, port: u16, duration: Duration) -
         Ok(connection) => match connection {
             Ok(mut stream) => match stream.write_all(b"HELLO!").await {
                 Ok(_) => match stream.read(&mut buffer).await {
-                    Ok(_) => Ok(str::from_utf8(&buffer).unwrap().to_string()),
+                    Ok(_) => Ok(str::from_utf8(&buffer)
+                        .unwrap_or("can't convert banner info to UTF-8")
+                        .to_string()),
                     Err(_) => Err(Error::new(
                         ErrorKind::ConnectionRefused,
                         "Can't get connection stream",

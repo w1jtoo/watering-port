@@ -22,11 +22,22 @@ impl PortInfo {
 
     pub async fn build_from(address: &str, port: u16, duration: Duration) -> io::Result<PortInfo> {
         if scanner::is_port_opened(address, port, duration).await {
-            match scanner::get_http_banner(address, port, duration).await {
-                Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Http)),
-                Err(_) => match scanner::get_tcp_socket_info(address, port, duration).await {
-                    Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Tcp)),
-                    Err(_) => match scanner::get_udp_socket_info(address, port, duration).await {
+            println!("Discovered port {}", port);
+            match scanner::get_http_banner(address, port, duration).await {             // trying to get http banner
+                Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Http)),      // if it is possible save banner
+                Err(_) => match scanner::with_timeout(                                  // if not trying to get tcp banner
+                    duration,
+                    scanner::get_tcp_socket_info(address, port, duration),
+                )
+                .await
+                {
+                    Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Tcp)),    // if it is possible save banner
+                    Err(_) => match scanner::with_timeout(                               // if not scan udp banner
+                        duration,
+                        scanner::get_udp_socket_info(address, port, duration),
+                    )
+                    .await
+                    {
                         Ok(answer) => Ok(PortInfo::new(port, answer, ProtocolType::Udp)),
                         Err(_) => Err(Error::new(
                             ErrorKind::NotConnected,
@@ -36,7 +47,7 @@ impl PortInfo {
                 },
             }
         } else {
-            return Err(Error::new(ErrorKind::Other, "Port is closed!")); // TODO: refactor scanner
+            return Err(Error::new(ErrorKind::Other, "Port is closed!"));
         }
     }
 
